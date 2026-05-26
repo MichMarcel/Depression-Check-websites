@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="container">
+    <p class="section-label" style="color: rgba(0,169,157,0.9);">Langkah Pertama</p>
+    <h2>Form Pemeriksaan Kondisi Mental</h2>
+    <p>Isi semua data dengan jujur untuk hasil analisis yang akurat. Privasi Anda terjaga.</p>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom: 64px;">
+
+  <!-- PROGRESS INDICATOR -->
+  <div style="display:flex; gap:8px; align-items:center; margin-bottom:32px;">
+    {% for step in [('1','Data Diri','👤'), ('2','Akademik','📚'), ('3','Gaya Hidup','🏃'), ('4','Prediksi','🧠')] %}
+    <div style="flex:1; text-align:center;">
+      <div style="width:36px;height:36px;border-radius:50%;background:{% if loop.index == 1 %}var(--teal){% elif loop.index == 4 %}var(--navy){% else %}var(--border){% endif %};
+        color:{% if loop.index <= 1 %}white{% else %}var(--text-light){% endif %};
+        display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;margin:auto 0 8px;">
+        {{ step[0] }}
+      </div>
+      <div style="font-size:11px;font-weight:600;color:{% if loop.index == 1 %}var(--teal){% else %}var(--text-light){% endif %};">{{ step[1] }}</div>
+    </div>
+    {% if not loop.last %}
+    <div style="flex:2; height:2px; background:var(--border); margin-bottom:24px; border-radius:2px;"></div>
+    {% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="predict-layout">
+
+    <!-- FORM -->
+    <form action="/predict_result" method="post" class="form-card" id="predictForm">
+
+      <p class="form-section-title">👤 Informasi Pribadi</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Usia <span>(tahun)</span></label>
+          <div class="input-with-unit">
+            <input name="age" type="number" min="17" max="30" class="form-control-modern" placeholder="e.g. 20" required>
+            <span class="input-unit">thn</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Jenis Kelamin</label>
+          <select name="gender" class="form-control-modern">
+            <option value="">-- Pilih --</option>
+            <option value="Male">Laki-laki</option>
+            <option value="Female">Perempuan</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Jurusan / Departemen</label>
+        <select name="department" class="form-control-modern">
+          <option value="">-- Pilih jurusan --</option>
+          <option value="Engineering">Teknik</option>
+          <option value="Business">Bisnis & Manajemen</option>
+          <option value="Arts">Seni & Humaniora</option>
+          <option value="Medical">Kedokteran & Kesehatan</option>
+          <option value="Science">Sains & MIPA</option>
+        </select>
+      </div>
+
+      <hr class="form-divider">
+      <p class="form-section-title">📚 Akademik</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>IPK <span>(CGPA)</span></label>
+          <div class="input-with-unit">
+            <input name="cgpa" type="number" step="0.01" min="0" max="4" class="form-control-modern" placeholder="e.g. 3.20" required>
+            <span class="input-unit">/ 4.0</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Jam Belajar <span>(per hari)</span></label>
+          <div class="input-with-unit">
+            <input name="study" type="number" step="0.1" min="0" max="24" class="form-control-modern" placeholder="e.g. 4.5" required>
+            <span class="input-unit">jam</span>
+          </div>
+        </div>
+      </div>
+
+      <hr class="form-divider">
+      <p class="form-section-title">🏃 Gaya Hidup & Kesehatan</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Durasi Tidur <span>(per malam)</span></label>
+          <div class="input-with-unit">
+            <input name="sleep" type="number" step="0.1" min="0" max="24" class="form-control-modern" placeholder="e.g. 7.3" required>
+            <span class="input-unit">jam</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Media Sosial <span>(per hari)</span></label>
+          <div class="input-with-unit">
+            <input name="social" type="number" step="0.1" min="0" max="24" class="form-control-modern" placeholder="e.g. 3.5" required>
+            <span class="input-unit">jam</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Aktivitas Fisik <span>(per hari)</span></label>
+          <div class="input-with-unit">
+            <input name="activity" type="number" min="0" max="300" class="form-control-modern" placeholder="e.g. 30" required>
+            <span class="input-unit">menit</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Tingkat Stres <span>(skala 1–10)</span></label>
+          <input name="stress" type="number" min="1" max="10" class="form-control-modern" placeholder="e.g. 6" id="stressInput" required>
+          <div class="progress-track" style="margin-top:8px;">
+            <div class="progress-fill" id="stressBar" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 28px;">
+        <button type="submit" class="btn-blue">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+          Analisis Kondisi Saya
+        </button>
+        <p style="text-align:center; font-size:12px; color:var(--text-light); margin-top:12px;">
+          🔒 Data Anda tidak disimpan secara permanen dan bersifat anonim
+        </p>
+      </div>
+
+    </form>
+
+    <!-- SIDEBAR -->
+    <div>
+      <div class="sidebar-tip">
+        <h4>Panduan Pengisian</h4>
+
+        <div class="tip-item">
+          <div class="tip-icon">📊</div>
+          <div class="tip-text">
+            <strong>IPK / CGPA</strong>
+            Masukkan nilai IPK dalam skala 4.0 (misal: 3.50)
+          </div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon">😤</div>
+          <div class="tip-text">
+            <strong>Tingkat Stres</strong>
+            1 = sangat santai, 10 = sangat tertekan. Jawab sejujurnya.
+          </div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon">🏃</div>
+          <div class="tip-text">
+            <strong>Aktivitas Fisik</strong>
+            Total menit olahraga/bergerak aktif per hari rata-rata
+          </div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon">🌙</div>
+          <div class="tip-text">
+            <strong>Durasi Tidur</strong>
+            Rata-rata jam tidur per malam dalam seminggu terakhir
+          </div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon">⚠️</div>
+          <div class="tip-text">
+            <strong>Penting Diingat</strong>
+            Hasil ini bukan diagnosis medis. Selalu konsultasikan dengan profesional.
+          </div>
+        </div>
+      </div>
+
+      <!-- Need help box -->
+      <div style="background:var(--light-blue); border:1px solid rgba(0,112,192,0.15); border-radius:var(--radius); padding:24px; margin-top:20px;">
+        <p style="font-weight:700; color:var(--navy); font-size:15px; margin-bottom:8px;">Butuh bicara dengan seseorang?</p>
+        <p style="font-size:13px; color:var(--text-mid); margin-bottom:16px;">Jika kamu merasa tidak baik-baik saja, jangan sendirian.</p>
+        <div style="font-size:13px; color:var(--text-mid); display:flex; flex-direction:column; gap:8px;">
+          <span>📞 Into The Light: <strong>119 ext 8</strong></span>
+          <span>💬 Yayasan Pulih: <strong>(021) 788-42580</strong></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const stressInput = document.getElementById('stressInput');
+const stressBar = document.getElementById('stressBar');
+
+stressInput.addEventListener('input', function() {
+  const val = Math.min(Math.max(parseInt(this.value) || 0, 0), 10);
+  stressBar.style.width = (val * 10) + '%';
+  stressBar.style.background = val <= 3
+    ? 'linear-gradient(90deg, #38A169, #68D391)'
+    : val <= 6
+    ? 'linear-gradient(90deg, #D69E2E, #F6E05E)'
+    : 'linear-gradient(90deg, #E53E3E, #FC8181)';
+});
+</script>
+
+{% endblock %}
