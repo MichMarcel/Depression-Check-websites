@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <div class="container">
+    <p class="section-label" style="color: rgba(0,169,157,0.9);">Visualisasi</p>
+    <h2>Grafik Distribusi Depresi</h2>
+    <p>Proporsi hasil prediksi dari semua pengguna DepressionCheck</p>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom: 64px;">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="card-modern text-center">
+        <p class="section-label">Depresi vs Tidak Depresi</p>
+        <canvas id="chart" style="max-width:300px; margin: auto;"></canvas>
+        <div style="display:flex; justify-content:center; gap:24px; margin-top:24px; padding-top:20px; border-top:1px solid var(--border);">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:14px;height:14px;border-radius:50%;background:#E53E3E;"></div>
+            <span style="font-size:14px;color:var(--text-mid);">Depresi: <strong>{{ depresi }}</strong></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:14px;height:14px;border-radius:50%;background:#38A169;"></div>
+            <span style="font-size:14px;color:var(--text-mid);">Tidak: <strong>{{ tidak }}</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+new Chart(document.getElementById('chart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Depresi', 'Tidak Depresi'],
+    datasets: [{
+      data: [{{ depresi }}, {{ tidak }}],
+      backgroundColor: ['#E53E3E', '#38A169'],
+      borderColor: ['#fff', '#fff'],
+      borderWidth: 4,
+      hoverOffset: 10
+    }]
+  },
+  options: {
+    cutout: '68%',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1a2640',
+        titleFont: { family: "'Plus Jakarta Sans', sans-serif" },
+        bodyFont: { family: "'Plus Jakarta Sans', sans-serif" },
+        padding: 12, cornerRadius: 8
+      }
+    }
+  }
+});
+</script>
+
+{% endblock %}
