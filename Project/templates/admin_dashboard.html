@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+    <div>
+      <p class="section-label" style="color: rgba(0,169,157,0.9);">Panel Admin</p>
+      <h2>Dashboard Data Prediksi</h2>
+      <p>Total data tersimpan: <strong style="color:white;">{{ data|length }} record</strong></p>
+    </div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      <a href="/overview" class="btn-outline-main" style="font-size:13px; padding:10px 20px;">
+        📊 Lihat Overview
+      </a>
+      <a href="/admin/logout" style="background:rgba(229,62,62,0.2); border:1px solid rgba(229,62,62,0.4); color:white; padding:10px 20px; border-radius:50px; font-size:13px; font-weight:600; text-decoration:none; transition:all 0.2s;">
+        🚪 Logout
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom: 64px;">
+
+  <!-- SUMMARY CARDS -->
+  <div class="stat-grid" style="margin-bottom:36px;">
+    <div class="stat-card">
+      <span class="stat-icon">📋</span>
+      <div class="stat-label">Total Prediksi</div>
+      <div class="stat-value">{{ data|length }}</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">😔</span>
+      <div class="stat-label">Terdeteksi Depresi</div>
+      <div class="stat-value">{{ data|selectattr(10, 'equalto', 'Depresi')|list|length if data else data|selectattr('10', 'equalto', 'Depresi')|list|length }}</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">😊</span>
+      <div class="stat-label">Tidak Depresi</div>
+      <div class="stat-value" id="notDepCount">—</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">📅</span>
+      <div class="stat-label">Departemen Terbanyak</div>
+      <div class="stat-value" id="topDept" style="font-size:20px;">—</div>
+    </div>
+  </div>
+
+  <!-- TABLE CARD -->
+  <div class="card-modern" style="padding:0; overflow:hidden;">
+
+    <!-- Table header + search -->
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--border); flex-wrap:wrap; gap:12px;">
+      <div>
+        <h5 style="font-family:'DM Serif Display',serif; font-size:20px; color:var(--navy); margin:0;">Semua Data Prediksi</h5>
+        <p style="font-size:13px; color:var(--text-light); margin:0;">Klik baris untuk detail, atau hapus data</p>
+      </div>
+      <div style="position:relative;">
+        <input type="text" id="searchInput" placeholder="Cari departemen, gender..." 
+          style="padding:10px 16px 10px 38px; border:1.5px solid var(--border); border-radius:50px; font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; color:var(--text-dark); background:var(--soft-bg); width:260px; outline:none; transition:all 0.2s;"
+          oninput="filterTable(this.value)"
+          onfocus="this.style.borderColor='var(--blue)'; this.style.background='white';"
+          onblur="this.style.borderColor='var(--border)'; this.style.background='var(--soft-bg)';">
+        <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;" width="14" height="14" fill="none" stroke="#718096" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </div>
+    </div>
+
+    <!-- Filter pills -->
+    <div style="padding:12px 24px; background:var(--soft-bg); border-bottom:1px solid var(--border); display:flex; gap:8px; flex-wrap:wrap;">
+      <span style="font-size:12px; color:var(--text-light); font-weight:600; line-height:30px;">Filter:</span>
+      <button onclick="filterBy('')" id="pill-all" class="filter-pill active">Semua</button>
+      <button onclick="filterBy('Depresi')" id="pill-dep" class="filter-pill">Depresi</button>
+      <button onclick="filterBy('Tidak Depresi')" id="pill-tidak" class="filter-pill">Tidak Depresi</button>
+    </div>
+
+    <!-- Scrollable Table -->
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:13px;" id="dataTable">
+        <thead>
+          <tr style="background:var(--navy);">
+            <th style="padding:12px 16px; color:white; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; text-align:center; white-space:nowrap;">ID</th>
+            <th style="padding:12px 16px; color:white; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; text-align:left;">Gender</th>
+            <th style="padding:12px 16px; color:white; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; text-align:left;">Dept.</th>
+            <th style="padding:12px 16px; color:white; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; text-align:center;">Usia</th>
+            <th style="padding:12px 16px; color:white; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; text-align:center;">IPK</th>
+            <th style="padding:12px 16px; color:white; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; text-align:center;">Tidur</th>
+            <th style="padding:12px 16px; color:white; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; text-align:center;">Stres</th>
+            <th style="padding:12px 16px; color:white; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; text-align:center;">Aktivitas</th>
+            <th style="padding:12px 16px; color:white; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; text-align:center;">Sosmed</th>
+            <th style="padding:12px 16px; color:white; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; text-align:center;">Hasil</th>
+            <th style="padding:12px 16px; color:white; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; text-align:center;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          {% for row in data %}
+          <tr style="border-bottom:1px solid var(--border); transition:background 0.15s;" 
+              onmouseover="this.style.background='var(--soft-bg)'" 
+              onmouseout="this.style.background='white'"
+              data-result="{{ row[10] }}">
+            <td style="padding:12px 16px; text-align:center; color:var(--text-light); font-weight:600;">{{ row[0] }}</td>
+            <td style="padding:12px 16px;">
+              <span style="display:flex; align-items:center; gap:6px;">
+                {{ '👨' if row[8] == 'Male' else '👩' }}
+                <span style="color:var(--text-dark);">{{ row[8] }}</span>
+              </span>
+            </td>
+            <td style="padding:12px 16px;">
+              <span style="background:var(--light-blue); color:var(--blue); font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;">{{ row[9] }}</span>
+            </td>
+            <td style="padding:12px 16px; text-align:center; color:var(--text-dark);">{{ row[1]|int }}</td>
+            <td style="padding:12px 16px; text-align:center; font-weight:600; color:{% if row[2] >= 3.0 %}var(--success){% else %}var(--danger){% endif %};">{{ row[2] }}</td>
+            <td style="padding:12px 16px; text-align:center; color:var(--text-dark);">{{ row[4] }}j</td>
+            <td style="padding:12px 16px; text-align:center;">
+              <span style="background:{% if row[7] > 7 %}#FEF2F2; color:#C53030{% elif row[7] > 5 %}#FFFBEB; color:#92400E{% else %}#F0FFF4; color:#276749{% endif %}; font-size:12px; font-weight:700; padding:3px 10px; border-radius:20px;">{{ row[7] }}</span>
+            </td>
+            <td style="padding:12px 16px; text-align:center; color:var(--text-dark);">{{ row[6]|int }}m</td>
+            <td style="padding:12px 16px; text-align:center; color:var(--text-dark);">{{ row[5] }}j</td>
+            <td style="padding:12px 16px; text-align:center;">
+              <span style="background:{% if row[10]=='Depresi' %}#FEF2F2; color:#C53030{% else %}#F0FFF4; color:#276749{% endif %}; font-size:12px; font-weight:700; padding:4px 12px; border-radius:20px; white-space:nowrap;">
+                {{ '😔' if row[10]=='Depresi' else '😊' }} {{ row[10] }}
+              </span>
+            </td>
+            <td style="padding:12px 16px; text-align:center;">
+              <a href="/admin/delete/{{ row[0] }}" 
+                onclick="return confirm('Hapus data ID {{ row[0] }}?')"
+                style="background:#FEF2F2; color:#C53030; border:none; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; text-decoration:none; transition:all 0.2s; display:inline-block;"
+                onmouseover="this.style.background='#C53030'; this.style.color='white';"
+                onmouseout="this.style.background='#FEF2F2'; this.style.color='#C53030';">
+                🗑 Hapus
+              </a>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="11" style="text-align:center; padding:48px; color:var(--text-light);">
+              <div style="font-size:40px; margin-bottom:12px;">📭</div>
+              <div style="font-size:16px; font-weight:600; color:var(--text-mid);">Belum ada data prediksi</div>
+              <div style="font-size:13px;">Data akan muncul setelah pengguna melakukan prediksi pertama.</div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer -->
+    <div style="padding:14px 24px; background:var(--soft-bg); border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--text-light);">
+      <span id="rowCount">Menampilkan {{ data|length }} data</span>
+      <span>Klik kolom untuk sort (soon)</span>
+    </div>
+  </div>
+
+</div>
+
+<style>
+.filter-pill {
+  background: white;
+  border: 1.5px solid var(--border);
+  color: var(--text-mid);
+  padding: 5px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: all 0.2s;
+}
+.filter-pill:hover { border-color: var(--blue); color: var(--blue); }
+.filter-pill.active { background: var(--navy); color: white; border-color: var(--navy); }
+</style>
+
+<script>
+// Compute summary stats from table data
+const rows = document.querySelectorAll('#tableBody tr[data-result]');
+let depCount = 0, notDepCount = 0;
+const deptCount = {};
+
+rows.forEach(r => {
+  const result = r.dataset.result;
+  if (result === 'Depresi') depCount++;
+  else notDepCount++;
+  const dept = r.children[2].querySelector('span').textContent.trim();
+  deptCount[dept] = (deptCount[dept] || 0) + 1;
+});
+
+document.getElementById('notDepCount').textContent = notDepCount;
+
+// Fix depresi count display
+document.querySelectorAll('.stat-card')[1].querySelector('.stat-value').textContent = depCount;
+
+// Top dept
+const topDept = Object.entries(deptCount).sort((a,b) => b[1]-a[1])[0];
+document.getElementById('topDept').textContent = topDept ? topDept[0] : '—';
+
+// Search
+function filterTable(query) {
+  const q = query.toLowerCase();
+  rows.forEach(r => {
+    const text = r.textContent.toLowerCase();
+    r.style.display = text.includes(q) ? '' : 'none';
+  });
+  updateCount();
+}
+
+// Filter pills
+let currentFilter = '';
+function filterBy(val) {
+  currentFilter = val;
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  document.getElementById(val === '' ? 'pill-all' : val === 'Depresi' ? 'pill-dep' : 'pill-tidak').classList.add('active');
+  rows.forEach(r => {
+    if (!val || r.dataset.result === val) r.style.display = '';
+    else r.style.display = 'none';
+  });
+  updateCount();
+}
+
+function updateCount() {
+  const visible = [...rows].filter(r => r.style.display !== 'none').length;
+  document.getElementById('rowCount').textContent = `Menampilkan ${visible} data`;
+}
+</script>
+
+{% endblock %}
