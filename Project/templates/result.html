@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container" style="padding-bottom: 64px; padding-top: 40px;">
+
+  <!-- RESULT HERO -->
+  <div class="row g-4 align-items-start">
+
+    <!-- LEFT: Hasil Utama -->
+    <div class="col-lg-7">
+      <p class="section-label">Hasil Analisis ML</p>
+      <h2 style="font-family:'DM Serif Display',serif; font-size:36px; color:var(--navy); margin-bottom:20px; line-height:1.2;">
+        Kondisi Anda telah dianalisis
+      </h2>
+
+      <!-- RESULT BADGE -->
+      <div class="result-badge {% if result == 'Depresi' %}danger{% else %}success{% endif %}" style="margin-bottom:24px;">
+        <span style="font-size:28px;">{% if result == 'Depresi' %}😔{% else %}😊{% endif %}</span>
+        <span>{{ result }}</span>
+      </div>
+
+      <!-- PROB + LEVEL -->
+      <div class="result-prob">
+        <!-- Ring Chart -->
+        <div class="prob-ring">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="40" fill="none"
+              stroke="{% if result == 'Depresi' %}#FEE2E2{% else %}#D1FAE5{% endif %}"
+              stroke-width="10"/>
+            <circle cx="50" cy="50" r="40" fill="none"
+              stroke="{% if result == 'Depresi' %}#E53E3E{% else %}#38A169{% endif %}"
+              stroke-width="10"
+              stroke-linecap="round"
+              stroke-dasharray="{{ (prob / 100 * 251.2) | round(1) }} 251.2"
+              style="transition: stroke-dasharray 1.5s ease;"/>
+          </svg>
+          <div class="prob-ring-label">
+            <span>{{ prob }}%</span>
+            <small>prob</small>
+          </div>
+        </div>
+
+        <div class="result-meta">
+          <p>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            Probabilitas: <strong>{{ prob }}%</strong>
+          </p>
+          <p>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            Tingkat Risiko:
+            <span class="risk-badge {% if level == 'Tinggi' %}tinggi{% elif level == 'Sedang' %}sedang{% else %}rendah{% endif %}">
+              {{ level }}
+            </span>
+          </p>
+
+          {% if result == 'Depresi' %}
+          <div style="margin-top:16px; padding:16px; background:#FEF2F2; border-radius:12px; border-left:4px solid var(--danger);">
+            <p style="font-size:13px; color:#9B2C2C; line-height:1.6; margin:0;">
+              <strong>Perhatian:</strong> Hasil ini mengindikasikan kemungkinan gejala depresi. 
+              Segera bicarakan dengan konselor atau profesional kesehatan mental di kampus Anda.
+            </p>
+          </div>
+          {% else %}
+          <div style="margin-top:16px; padding:16px; background:#F0FFF4; border-radius:12px; border-left:4px solid var(--success);">
+            <p style="font-size:13px; color:#276749; line-height:1.6; margin:0;">
+              <strong>Bagus!</strong> Kondisi mental Anda tampak baik. Tetap jaga pola hidup sehat 
+              dan lakukan tes secara berkala untuk memantau kondisi Anda.
+            </p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- INSIGHT -->
+      <div class="card-modern" style="margin-top: 28px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+          <div style="width:36px;height:36px;background:var(--light-blue);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;">💡</div>
+          <h5 style="font-family:'DM Serif Display',serif; font-size:20px; color:var(--navy); margin:0;">Insight Hasil Analisis</h5>
+        </div>
+        <ul class="insight-list">
+          {% for i in insight %}
+          <li>{{ i }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:28px;">
+        <a href="/clear" class="btn-secondary-main">
+          🔄 Ulangi Tes
+        </a>
+        <a href="/overview" class="btn-outline-main" style="color:var(--navy); border-color:var(--border);">
+          📊 Lihat Data Populasi
+        </a>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Analisis Input -->
+    <div class="col-lg-5">
+      <div class="card-modern" style="padding:24px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+          <div style="width:36px;height:36px;background:#E6F7F6;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;">📋</div>
+          <h5 style="font-family:'DM Serif Display',serif; font-size:20px; color:var(--navy); margin:0;">Analisis Input Anda</h5>
+        </div>
+
+        <table class="interp-table">
+          <thead>
+            <tr>
+              <th>Variabel</th>
+              <th>Nilai Anda</th>
+              <th>Normal</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for key, val in interpretasi.items() %}
+            <tr>
+              <td><strong>{{ key }}</strong></td>
+              <td>{{ val.value }}</td>
+              <td style="color:var(--text-light);">{{ val.normal }}</td>
+              <td>
+                <span class="
+                  {% if val.status == 'Tinggi' %}status-tinggi status-dot
+                  {% elif val.status == 'Rendah' %}status-rendah status-dot
+                  {% elif val.status == 'Sedang' %}status-sedang status-dot
+                  {% else %}status-normal status-dot
+                  {% endif %}
+                ">
+                  {{ val.status }}
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <!-- LEGEND -->
+        <div style="display:flex; gap:16px; margin-top:16px; padding-top:16px; border-top:1px solid var(--border); flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--danger);display:inline-block;"></span>
+            Tinggi = perlu perhatian
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);">
+            <span style="width:8px;height:8px;border-radius:50%;background:#D69E2E;display:inline-block;"></span>
+            Sedang = cukup baik
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);">
+            <span style="width:8px;height:8px;border-radius:50%;background:#2563EB;display:inline-block;"></span>
+            Rendah = di bawah normal
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--success);display:inline-block;"></span>
+            Normal = baik
+          </div>
+        </div>
+      </div>
+
+      <!-- RESOURCES -->
+      <div style="background: linear-gradient(135deg,#003865,#004E8A); border-radius:var(--radius); padding:24px; margin-top:20px; color:white;">
+        <h5 style="font-family:'DM Serif Display',serif; font-size:18px; margin-bottom:16px;">Butuh Bantuan Lebih?</h5>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;gap:12px;align-items:center;">
+            <span style="font-size:20px;">📞</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:white;">Lembaga ...</div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.6);">119 ext 8 — 24 jam</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;">
+            <span style="font-size:20px;">🏥</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:white;">Yayasan ...</div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.6);">(021) 788-42580</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;">
+            <span style="font-size:20px;">🎓</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:white;">Konselor ...</div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.6);">Kunjungi Unit Bimbingan Konseling</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Animate ring on load
+window.addEventListener('load', () => {
+  const circles = document.querySelectorAll('.prob-ring circle:last-child');
+  circles.forEach(c => {
+    const da = c.getAttribute('stroke-dasharray');
+    c.setAttribute('stroke-dasharray', '0 251.2');
+    setTimeout(() => {
+      c.setAttribute('stroke-dasharray', da);
+    }, 100);
+  });
+});
+</script>
+
+{% endblock %}
