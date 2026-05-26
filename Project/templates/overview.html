@@ -1,0 +1,549 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="container">
+    <p class="section-label" style="color: rgba(0,169,157,0.9);">Data & Statistik</p>
+    <h2>Dashboard Analisis Depresi</h2>
+    <p>Ringkasan data hasil prediksi mahasiswa yang telah menggunakan DepressionCheck</p>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom: 64px;">
+
+  <!-- STAT CARDS -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <span class="stat-icon">😔</span>
+      <div class="stat-label">Terdeteksi Depresi</div>
+      <div class="stat-value">{{ depresi }}</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">😊</span>
+      <div class="stat-label">Tidak Depresi</div>
+      <div class="stat-value">{{ tidak }}</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">😤</span>
+      <div class="stat-label">Rata-rata Stres</div>
+      <div class="stat-value">{{ avg_stress }}</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">🌙</span>
+      <div class="stat-label">Rata-rata Tidur</div>
+      <div class="stat-value">{{ avg_sleep }}</div>
+    </div>
+  </div>
+
+  <!-- PREVALENCE VISUAL -->
+  <div class="card-modern" style="margin-bottom: 32px;">
+    <div class="row align-items-center g-4">
+      <div class="col-md-5 text-center">
+        <canvas id="doughnutChart" style="max-width:260px; margin:auto;"></canvas>
+      </div>
+      <div class="col-md-7">
+        <p class="section-label">Distribusi Hasil</p>
+        <h4 style="font-family:'DM Serif Display',serif; font-size:26px; color:var(--navy); margin-bottom:12px;">Proporsi Depresi vs Tidak Depresi</h4>
+        <p style="color:var(--text-mid); font-size:15px; margin-bottom:20px;">Dari seluruh pengguna yang telah melakukan tes, berikut proporsi hasil prediksi yang diperoleh.</p>
+        <div style="display:flex; gap:24px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="width:14px;height:14px;border-radius:50%;background:#E53E3E;"></div>
+            <span style="font-size:14px;color:var(--text-mid);">Depresi: <strong>{{ depresi }}</strong></span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="width:14px;height:14px;border-radius:50%;background:#38A169;"></div>
+            <span style="font-size:14px;color:var(--text-mid);">Tidak: <strong>{{ tidak }}</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHART GRID -->
+  <p class="section-label">Analisis Faktor</p>
+  <h3 style="font-family:'DM Serif Display',serif; font-size:28px; color:var(--navy); margin-bottom:8px;">Hubungan Faktor dengan Depresi</h3>
+  <p style="color:var(--text-mid); margin-bottom:28px;">Visualisasi korelasi antara variabel gaya hidup dan tingkat depresi mahasiswa.</p>
+
+  <div class="chart-grid">
+
+    <div class="chart-card">
+      <h6>IPK (CGPA) vs Depresi</h6>
+      <p class="chart-desc">Sebaran IPK pada kelompok terdeteksi depresi</p>
+      <canvas id="cgpa" height="200"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <h6>Durasi Tidur vs Depresi</h6>
+      <p class="chart-desc">Distribusi jam tidur pada kelompok terdeteksi depresi</p>
+      <canvas id="sleep" height="200"></canvas>
+    </div>
+    
+    <div class="chart-card">
+      <h6>Durasi Belajar vs Depresi</h6>
+      <p class="chart-desc">Distribusi jam belajar pada kelompok terdeteksi depresi</p>
+      <canvas id="study" height="200"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <h6>Durasi Penggunaan Sosial Media vs Depresi</h6>
+      <p class="chart-desc">Distribusi jam penggunaan sosial media pada kelompok terdeteksi depresi</p>
+      <canvas id="social" height="200"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <h6>Aktivitas Fisik vs Depresi</h6>
+      <p class="chart-desc">Menit aktivitas fisik harian pada kelompok terdeteksi depresi</p>
+      <canvas id="activity" height="200"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <h6>Tingkat Stres vs Depresi</h6>
+      <p class="chart-desc">Skala stres pada kelompok terdeteksi depresi</p>
+      <canvas id="stress" height="200"></canvas>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       SEKSI 2: DISTRIBUSI PER GENDER & DEPARTMENT
+  ══════════════════════════════════════════════════════════════════ -->
+  <div style="margin-top:56px;">
+    <p class="section-label">Demografi</p>
+    <h3 style="font-family:'DM Serif Display',serif; font-size:28px; color:var(--navy); margin-bottom:8px;">Depresi berdasarkan Gender & Departemen</h3>
+    <p style="color:var(--text-mid); margin-bottom:28px;">Perbandingan jumlah kasus depresi dan tidak depresi pada setiap kelompok demografis.</p>
+
+    <div class="chart-grid" style="grid-template-columns: repeat(2, 1fr);">
+
+      <!-- Gender vs Depresi -->
+      <div class="chart-card" style="grid-column: span 1;">
+        <h6>Gender vs Depresi</h6>
+        <p class="chart-desc">Jumlah kasus depresi dan tidak depresi berdasarkan jenis kelamin</p>
+        <canvas id="genderDep" height="220"></canvas>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;">
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#E53E3E;display:inline-block;"></span>Depresi</span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#38A169;display:inline-block;"></span>Tidak Depresi</span>
+        </div>
+      </div>
+
+      <!-- Department vs Depresi -->
+      <div class="chart-card" style="grid-column: span 1;">
+        <h6>Departemen vs Depresi</h6>
+        <p class="chart-desc">Jumlah kasus depresi dan tidak depresi berdasarkan departemen</p>
+        <canvas id="deptDep" height="220"></canvas>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;">
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#E53E3E;display:inline-block;"></span>Depresi</span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#38A169;display:inline-block;"></span>Tidak Depresi</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       SEKSI 3: 3 VARIABEL — VARIABEL + GENDER + DEPRESI
+  ══════════════════════════════════════════════════════════════════ -->
+  <div style="margin-top:56px;">
+    <p class="section-label">Analisis Multivariat</p>
+    <h3 style="font-family:'DM Serif Display',serif; font-size:28px; color:var(--navy); margin-bottom:8px;">Variabel × Gender × Depresi</h3>
+    <p style="color:var(--text-mid); margin-bottom:28px;">Rata-rata setiap variabel gaya hidup dipecah berdasarkan gender dan status depresi — memperlihatkan perbedaan pola antara Male/Female yang depresi vs tidak.</p>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h6>IPK × Gender × Depresi</h6>
+        <p class="chart-desc">Rata-rata IPK per gender dan status depresi</p>
+        <canvas id="cgpaGender" height="200"></canvas>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;">
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#E53E3E;display:inline-block;"></span>Depresi</span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#38A169;display:inline-block;"></span>Tidak Depresi</span>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h6>Tidur × Gender × Depresi</h6>
+        <p class="chart-desc">Rata-rata jam tidur per gender dan status depresi</p>
+        <canvas id="sleepGender" height="200"></canvas>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;">
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#E53E3E;display:inline-block;"></span>Depresi</span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#38A169;display:inline-block;"></span>Tidak Depresi</span>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h6>Belajar × Gender × Depresi</h6>
+        <p class="chart-desc">Rata-rata jam belajar per gender dan status depresi</p>
+        <canvas id="studyGender" height="200"></canvas>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;">
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#E53E3E;display:inline-block;"></span>Depresi</span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#38A169;display:inline-block;"></span>Tidak Depresi</span>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h6>Media Sosial × Gender × Depresi</h6>
+        <p class="chart-desc">Rata-rata jam sosmed per gender dan status depresi</p>
+        <canvas id="socialGender" height="200"></canvas>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;">
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#E53E3E;display:inline-block;"></span>Depresi</span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#38A169;display:inline-block;"></span>Tidak Depresi</span>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h6>Aktivitas Fisik × Gender × Depresi</h6>
+        <p class="chart-desc">Rata-rata menit aktivitas per gender dan status depresi</p>
+        <canvas id="activityGender" height="200"></canvas>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;">
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#E53E3E;display:inline-block;"></span>Depresi</span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#38A169;display:inline-block;"></span>Tidak Depresi</span>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h6>Stres × Gender × Depresi</h6>
+        <p class="chart-desc">Rata-rata tingkat stres per gender dan status depresi</p>
+        <canvas id="stressGender" height="200"></canvas>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;">
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#E53E3E;display:inline-block;"></span>Depresi</span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#38A169;display:inline-block;"></span>Tidak Depresi</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       SEKSI 4: 3 VARIABEL — VARIABEL + DEPARTMENT + DEPRESI
+  ══════════════════════════════════════════════════════════════════ -->
+  <div style="margin-top:56px;">
+    <p class="section-label">Analisis Multivariat</p>
+    <h3 style="font-family:'DM Serif Display',serif; font-size:28px; color:var(--navy); margin-bottom:8px;">Variabel × Departemen × Depresi</h3>
+    <p style="color:var(--text-mid); margin-bottom:28px;">Rata-rata setiap variabel gaya hidup dipecah berdasarkan departemen dan status depresi — mengungkap pola berbeda antar jurusan.</p>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h6>IPK × Departemen × Depresi</h6>
+        <p class="chart-desc">Rata-rata IPK per departemen dan status depresi</p>
+        <canvas id="cgpaDept" height="200"></canvas>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;">
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#E53E3E;display:inline-block;"></span>Depresi</span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#38A169;display:inline-block;"></span>Tidak Depresi</span>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h6>Tidur × Departemen × Depresi</h6>
+        <p class="chart-desc">Rata-rata jam tidur per departemen dan status depresi</p>
+        <canvas id="sleepDept" height="200"></canvas>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;">
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#E53E3E;display:inline-block;"></span>Depresi</span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#38A169;display:inline-block;"></span>Tidak Depresi</span>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h6>Belajar × Departemen × Depresi</h6>
+        <p class="chart-desc">Rata-rata jam belajar per departemen dan status depresi</p>
+        <canvas id="studyDept" height="200"></canvas>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;">
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#E53E3E;display:inline-block;"></span>Depresi</span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#38A169;display:inline-block;"></span>Tidak Depresi</span>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h6>Media Sosial × Departemen × Depresi</h6>
+        <p class="chart-desc">Rata-rata jam sosmed per departemen dan status depresi</p>
+        <canvas id="socialDept" height="200"></canvas>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;">
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#E53E3E;display:inline-block;"></span>Depresi</span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#38A169;display:inline-block;"></span>Tidak Depresi</span>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h6>Aktivitas Fisik × Departemen × Depresi</h6>
+        <p class="chart-desc">Rata-rata menit aktivitas per departemen dan status depresi</p>
+        <canvas id="activityDept" height="200"></canvas>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;">
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#E53E3E;display:inline-block;"></span>Depresi</span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#38A169;display:inline-block;"></span>Tidak Depresi</span>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h6>Stres × Departemen × Depresi</h6>
+        <p class="chart-desc">Rata-rata tingkat stres per departemen dan status depresi</p>
+        <canvas id="stressDept" height="200"></canvas>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;">
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#E53E3E;display:inline-block;"></span>Depresi</span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="width:10px;height:10px;border-radius:2px;background:#38A169;display:inline-block;"></span>Tidak Depresi</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="info-banner" style="margin-top: 56px;">
+    <div class="info-banner-text">
+      <h3>Ingin tahu kondisi Anda?</h3>
+      <p>Lakukan pemeriksaan sekarang dan dapatkan hasil analisis personal berbasis machine learning.</p>
+    </div>
+    <a href="/predict" class="btn-primary-main" style="white-space:nowrap; flex-shrink:0;">
+      Mulai Tes
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const chartDefaults = {
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#1a2640',
+      titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12 },
+      bodyFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12 },
+      padding: 10, cornerRadius: 8,
+    }
+  },
+  scales: {
+    x: {
+      grid: { color: 'rgba(0,0,0,0.04)' },
+      ticks: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 }, color: '#718096' }
+    },
+    y: {
+      grid: { color: 'rgba(0,0,0,0.04)' },
+      ticks: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 }, color: '#718096' }
+    }
+  }
+};
+
+// Doughnut
+new Chart(document.getElementById('doughnutChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Depresi', 'Tidak Depresi'],
+    datasets: [{
+      data: [{{ depresi }}, {{ tidak }}],
+      backgroundColor: ['#E53E3E', '#38A169'],
+      borderColor: ['#fff', '#fff'],
+      borderWidth: 3,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    cutout: '72%',
+    plugins: {
+      legend: { display: false },
+      tooltip: { backgroundColor: '#1a2640', padding: 10, cornerRadius: 8 }
+    }
+  }
+});
+
+const gradGold = (ctx) => {
+  const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 220);
+  g.addColorStop(0, 'rgba(214,158,46,0.8)');
+  g.addColorStop(1, 'rgba(214,158,46,0.2)');
+  return g;
+};
+const gradBlue = (ctx) => {
+  const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 220);
+  g.addColorStop(0, 'rgba(0,112,192,0.8)');
+  g.addColorStop(1, 'rgba(0,112,192,0.2)');
+  return g;
+};
+const gradPink = (ctx) => {
+  const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 220);
+  g.addColorStop(0, 'rgba(236,72,153,0.8)');
+  g.addColorStop(1, 'rgba(236,72,153,0.2)');
+  return g;
+};
+const gradPurple = (ctx) => {
+  const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 220);
+  g.addColorStop(0, 'rgba(168,85,247,0.8)');
+  g.addColorStop(1, 'rgba(168,85,247,0.2)');
+  return g;
+};
+const gradTeal = (ctx) => {
+  const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 220);
+  g.addColorStop(0, 'rgba(0,169,157,0.8)');
+  g.addColorStop(1, 'rgba(0,169,157,0.2)');
+  return g;
+};
+const gradRed = (ctx) => {
+  const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 220);
+  g.addColorStop(0, 'rgba(229,62,62,0.8)');
+  g.addColorStop(1, 'rgba(229,62,62,0.2)');
+  return g;
+};
+
+new Chart(document.getElementById('cgpa'), {
+  type: 'bar',
+  data: {
+    labels: [{% for i in cgpa_vs_dep %}'{{ i[0] }}',{% endfor %}],
+    datasets: [{ data: [{% for i in cgpa_vs_dep %}{{ i[1] }},{% endfor %}], backgroundColor: gradGold, borderRadius: 8, borderSkipped: false }]
+  },
+  options: { ...chartDefaults, responsive: true }
+});
+
+new Chart(document.getElementById('sleep'), {
+  type: 'bar',
+  data: {
+    labels: [{% for i in sleep_vs_dep %}'{{ i[0] }}',{% endfor %}],
+    datasets: [{ data: [{% for i in sleep_vs_dep %}{{ i[1] }},{% endfor %}], backgroundColor: gradBlue, borderRadius: 8, borderSkipped: false }]
+  },
+  options: { ...chartDefaults, responsive: true }
+});
+
+new Chart(document.getElementById('study'), {
+  type: 'bar',
+  data: {
+    labels: [{% for i in study_vs_dep %}'{{ i[0] }}',{% endfor %}],
+    datasets: [{ data: [{% for i in study_vs_dep %}{{ i[1] }},{% endfor %}], backgroundColor: gradPink, borderRadius: 8, borderSkipped: false }]
+  },
+  options: { ...chartDefaults, responsive: true }
+});
+
+new Chart(document.getElementById('social'), {
+  type: 'bar',
+  data: {
+    labels: [{% for i in social_vs_dep %}'{{ i[0] }}',{% endfor %}],
+    datasets: [{ data: [{% for i in social_vs_dep %}{{ i[1] }},{% endfor %}], backgroundColor: gradPurple, borderRadius: 8, borderSkipped: false }]
+  },
+  options: { ...chartDefaults, responsive: true }
+});
+
+new Chart(document.getElementById('activity'), {
+  type: 'bar',
+  data: {
+    labels: [{% for i in activity_vs_dep %}'{{ i[0] }}',{% endfor %}],
+    datasets: [{ data: [{% for i in activity_vs_dep %}{{ i[1] }},{% endfor %}], backgroundColor: gradTeal, borderRadius: 8, borderSkipped: false }]
+  },
+  options: { ...chartDefaults, responsive: true }
+});
+
+new Chart(document.getElementById('stress'), {
+  type: 'bar',
+  data: {
+    labels: [{% for i in stress_vs_dep %}'{{ i[0] }}',{% endfor %}],
+    datasets: [{ data: [{% for i in stress_vs_dep %}{{ i[1] }},{% endfor %}], backgroundColor: gradRed, borderRadius: 8, borderSkipped: false }]
+  },
+  options: { ...chartDefaults, responsive: true }
+});
+
+// ── Helper: pivot data 3-var menjadi grouped bar ──────────────────────────────
+// rows: [{group, result, value}, ...]
+// groups: urutan label sumbu-X
+// returns {labels, depData, tidakData}
+function pivotGrouped(rows, groupIdx, resultIdx, valIdx, groupOrder) {
+  const map = {};
+  rows.forEach(r => {
+    const g = r[groupIdx];
+    const res = r[resultIdx];
+    const val = r[valIdx];
+    if (!map[g]) map[g] = {};
+    map[g][res] = val;
+  });
+  const labels = groupOrder.filter(g => map[g]);
+  const depData   = labels.map(g => map[g]['Depresi']       ?? 0);
+  const tidakData = labels.map(g => map[g]['Tidak Depresi'] ?? 0);
+  return { labels, depData, tidakData };
+}
+
+const groupedDefaults = {
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#1a2640',
+      titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12 },
+      bodyFont:  { family: "'Plus Jakarta Sans', sans-serif", size: 12 },
+      padding: 10, cornerRadius: 8,
+    }
+  },
+  scales: {
+    x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 10 }, color: '#718096' } },
+    y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 10 }, color: '#718096' } }
+  },
+  responsive: true
+};
+
+function makeGroupedBar(canvasId, labels, depData, tidakData) {
+  new Chart(document.getElementById(canvasId), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Depresi',       data: depData,   backgroundColor: 'rgba(229,62,62,0.82)',  borderRadius: 6, borderSkipped: false },
+        { label: 'Tidak Depresi', data: tidakData, backgroundColor: 'rgba(56,161,105,0.82)', borderRadius: 6, borderSkipped: false },
+      ]
+    },
+    options: { ...groupedDefaults }
+  });
+}
+
+// ── Seksi 2: Gender & Department vs Depresi (stacked grouped) ─────────────────
+{
+  const genderRows  = {{ gender_dep | tojson }};
+  const genderOrder = ['Female', 'Male'];
+  const gd = pivotGrouped(genderRows, 0, 1, 2, genderOrder);
+  makeGroupedBar('genderDep', gd.labels, gd.depData, gd.tidakData);
+
+  const deptRows  = {{ dept_dep | tojson }};
+  const deptOrder = ['Arts','Business','Engineering','Medical','Science'];
+  const dd = pivotGrouped(deptRows, 0, 1, 2, deptOrder);
+  makeGroupedBar('deptDep', dd.labels, dd.depData, dd.tidakData);
+}
+
+// ── Seksi 3: Variabel × Gender × Depresi ──────────────────────────────────────
+{
+  const genderOrder = ['Female', 'Male'];
+
+  const cgpaG = {{ cgpa_gender_dep | tojson }};
+  const d = pivotGrouped(cgpaG, 0, 1, 2, genderOrder);
+  makeGroupedBar('cgpaGender', d.labels, d.depData, d.tidakData);
+
+  const sleepG = {{ sleep_gender_dep | tojson }};
+  const s = pivotGrouped(sleepG, 0, 1, 2, genderOrder);
+  makeGroupedBar('sleepGender', s.labels, s.depData, s.tidakData);
+
+  const studyG = {{ study_gender_dep | tojson }};
+  const st = pivotGrouped(studyG, 0, 1, 2, genderOrder);
+  makeGroupedBar('studyGender', st.labels, st.depData, st.tidakData);
+
+  const socialG = {{ social_gender_dep | tojson }};
+  const so = pivotGrouped(socialG, 0, 1, 2, genderOrder);
+  makeGroupedBar('socialGender', so.labels, so.depData, so.tidakData);
+
+  const actG = {{ activity_gender_dep | tojson }};
+  const ac = pivotGrouped(actG, 0, 1, 2, genderOrder);
+  makeGroupedBar('activityGender', ac.labels, ac.depData, ac.tidakData);
+
+  const stressG = {{ stress_gender_dep | tojson }};
+  const sr = pivotGrouped(stressG, 0, 1, 2, genderOrder);
+  makeGroupedBar('stressGender', sr.labels, sr.depData, sr.tidakData);
+}
+
+// ── Seksi 4: Variabel × Departemen × Depresi ──────────────────────────────────
+{
+  const deptOrder = ['Arts','Business','Engineering','Medical','Science'];
+
+  const cgpaD = {{ cgpa_dept_dep | tojson }};
+  const d = pivotGrouped(cgpaD, 0, 1, 2, deptOrder);
+  makeGroupedBar('cgpaDept', d.labels, d.depData, d.tidakData);
+
+  const sleepD = {{ sleep_dept_dep | tojson }};
+  const s = pivotGrouped(sleepD, 0, 1, 2, deptOrder);
+  makeGroupedBar('sleepDept', s.labels, s.depData, s.tidakData);
+
+  const studyD = {{ study_dept_dep | tojson }};
+  const st = pivotGrouped(studyD, 0, 1, 2, deptOrder);
+  makeGroupedBar('studyDept', st.labels, st.depData, st.tidakData);
+
+  const socialD = {{ social_dept_dep | tojson }};
+  const so = pivotGrouped(socialD, 0, 1, 2, deptOrder);
+  makeGroupedBar('socialDept', so.labels, so.depData, so.tidakData);
+
+  const actD = {{ activity_dept_dep | tojson }};
+  const ac = pivotGrouped(actD, 0, 1, 2, deptOrder);
+  makeGroupedBar('activityDept', ac.labels, ac.depData, ac.tidakData);
+
+  const stressD = {{ stress_dept_dep | tojson }};
+  const sr = pivotGrouped(stressD, 0, 1, 2, deptOrder);
+  makeGroupedBar('stressDept', sr.labels, sr.depData, sr.tidakData);
+}
+
+</script>
+
+{% endblock %}
