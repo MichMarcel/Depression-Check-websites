@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- HERO -->
+<section class="hero-section">
+  <div class="container">
+    <div class="animate-fade-up">
+      <div class="hero-badge">Alat Skrining Berbasis ML untuk Mahasiswa</div>
+      <h1>Pahami kondisi <em>mentalmu</em> sebelum terlambat</h1>
+      <p>Deteksi dini depresi mahasiswa melalui analisis cerdas berbasis machine learning.</p>
+      <div class="hero-actions">
+        <a href="/predict" class="btn-primary-main">
+          <span>Mulai Pemeriksaan</span>
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="/overview" class="btn-outline-main">Lihat Data Analisis</a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="hero-stat-num">1 : 3</span>
+          <div class="hero-stat-label">Mahasiswa alami depresi</div>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">78%</span>
+          <div class="hero-stat-label">Akurasi model ML</div>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">2 mnt</span>
+          <div class="hero-stat-label">Waktu pemeriksaan</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+
+  <!-- APA ITU DEPRESI -->
+  <section class="section">
+    <div class="animate-fade-up delay-1">
+      <p class="section-label">Kenali Lebih Dalam</p>
+      <h2 class="section-title">Apa itu Depresi?</h2>
+    </div>
+    <div class="row align-items-center mt-4 g-4">
+      <div class="col-lg-6 animate-fade-up delay-2">
+        <div class="card-modern">
+          <p style="font-size:16px; color:var(--text-mid); line-height:1.8; margin-bottom:20px;">
+            Depresi adalah gangguan mental serius yang memengaruhi cara seseorang berpikir, 
+            merasakan, dan bertindak. Berbeda dari sekadar rasa sedih biasa, depresi bisa 
+            berlangsung berminggu-minggu hingga berbulan-bulan dan mengganggu kehidupan sehari-hari.
+          </p>
+          <p style="font-size:16px; color:var(--text-mid); line-height:1.8;">
+            Mahasiswa sangat rentan karena tekanan akademik, perubahan lingkungan sosial, 
+            dan pola hidup yang tidak sehat. Deteksi dini adalah kunci untuk mendapatkan 
+            bantuan yang tepat waktu.
+          </p>
+
+          <div style="display:flex; gap:24px; margin-top:28px; padding-top:24px; border-top:1px solid var(--border);">
+            <div style="text-align:center;">
+              <div style="font-family:'DM Serif Display',serif; font-size:28px; color:var(--navy);">30%</div>
+              <div style="font-size:12px; color:var(--text-light);">mahasiswa rentan</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-family:'DM Serif Display',serif; font-size:28px; color:var(--navy);">60%</div>
+              <div style="font-size:12px; color:var(--text-light);">tidak mencari bantuan</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-family:'DM Serif Display',serif; font-size:28px; color:var(--navy);">80%</div>
+              <div style="font-size:12px; color:var(--text-light);">bisa pulih dengan bantuan</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 animate-fade-up delay-3">
+        <div style="background: linear-gradient(135deg, var(--light-blue), #E0F2FE); border-radius: var(--radius); padding: 32px; border: 1px solid rgba(0,112,192,0.1);">
+          <h5 style="font-family:'DM Serif Display',serif; font-size:20px; color:var(--navy); margin-bottom:20px;">Tanda-tanda yang perlu diperhatikan</h5>
+          {% set symptoms = [
+            ('😔', 'Perasaan sedih atau kosong yang berkepanjangan'),
+            ('😴', 'Gangguan tidur — terlalu banyak atau terlalu sedikit'),
+            ('📉', 'Penurunan nilai akademik secara signifikan'),
+            ('🚶', 'Menarik diri dari pergaulan sosial'),
+            ('😮‍💨', 'Kelelahan atau kehilangan energi terus-menerus'),
+            ('🧠', 'Sulit berkonsentrasi atau membuat keputusan'),
+          ] %}
+          {% for icon, text in symptoms %}
+          <div style="display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid rgba(0,112,192,0.1);">
+            <span style="font-size:20px;">{{ icon }}</span>
+            <span style="font-size:14px; color:var(--text-mid);">{{ text }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAKTOR RISIKO -->
+  <section class="section" style="padding-top:0">
+    <p class="section-label animate-fade-up">Faktor Risiko</p>
+    <h2 class="section-title animate-fade-up delay-1">Apa yang mempengaruhi kondisi mentalmu?</h2>
+    <p class="section-subtitle animate-fade-up delay-2">Kombinasi berbagai faktor ini yang dianalisis oleh model machine learning kami.</p>
+
+    <div class="factor-grid">
+      <div class="factor-card animate-fade-up delay-1">
+        <div class="factor-icon">😰</div>
+        <h5>Tingkat Stres</h5>
+        <p>Tekanan akademik dan sosial yang berlebihan adalah pemicu utama gejala depresi pada mahasiswa.</p>
+      </div>
+      <div class="factor-card animate-fade-up delay-2">
+        <div class="factor-icon">🌙</div>
+        <h5>Kualitas Tidur</h5>
+        <p>Kurang tidur kronis mengganggu keseimbangan emosional dan kemampuan kognitif secara signifikan.</p>
+      </div>
+      <div class="factor-card animate-fade-up delay-3">
+        <div class="factor-icon">🏃</div>
+        <h5>Aktivitas Fisik</h5>
+        <p>Gaya hidup sedentari meningkatkan risiko depresi hingga 25% dibanding mereka yang aktif bergerak.</p>
+      </div>
+      <div class="factor-card animate-fade-up delay-4">
+        <div class="factor-icon">📚</div>
+        <h5>Performa Akademik</h5>
+        <p>IPK yang rendah atau penurunan nilai tiba-tiba bisa menjadi indikator sekaligus pemicu depresi.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BANNER -->
+  <div class="info-banner animate-fade-up" style="margin-bottom: 64px;">
+    <div class="info-banner-text">
+      <h3>Siap untuk mengetahui kondisimu?</h3>
+      <p>Tes hanya membutuhkan 2 menit. Semua data bersifat anonim dan tidak disimpan secara personal.</p>
+    </div>
+    <a href="/predict" class="btn-primary-main" style="white-space:nowrap; flex-shrink:0;">
+      Mulai Sekarang
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+
+</div>
+
+<script>
+// Intersection observer for animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+      e.target.style.transition = 'all 0.6s ease';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.animate-fade-up').forEach(el => {
+  if (!el.style.opacity) el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  observer.observe(el);
+});
+</script>
+
+{% endblock %}
